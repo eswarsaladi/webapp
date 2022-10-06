@@ -29,6 +29,7 @@ npm run dev
 
 To test
 We will be using jest for unit tests
+super test is used for mock data
 
 ```
 npm run test
