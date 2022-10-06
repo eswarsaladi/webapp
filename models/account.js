@@ -5,9 +5,23 @@ class Account {
   static async create(userDetails) {
     try {
       userDetails.password = await Account.hashPassword(userDetails.password);
-      const id = await knex("accounts").insert(userDetails).returning("id");
+      const data = await knex("accounts").insert(userDetails).returning("id");
+      const id = data["0"]["id"];
 
-      return { response: id };
+      const result = await knex
+        .select(
+          "id",
+          "first_name",
+          "last_name",
+          "username",
+          "phone",
+          "account_created",
+          "account_updated"
+        )
+        .from("accounts")
+        .where({ id })
+        .first();
+      return { response: result };
     } catch (error) {
       return { error: error.toString() };
     }
@@ -31,7 +45,15 @@ class Account {
   static async get(id, username) {
     try {
       const user = await knex
-        .select("id", "first_name", "last_name", "username", "phone")
+        .select(
+          "id",
+          "first_name",
+          "last_name",
+          "username",
+          "phone",
+          "account_created",
+          "account_updated"
+        )
         .from("accounts")
         .where({ id, username })
         .first();
