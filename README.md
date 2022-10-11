@@ -21,7 +21,7 @@ To run the server
 npm run start
 ```
 
-To run the server with hot reload
+To run the server with hot reload.
 
 ```
 npm run dev
