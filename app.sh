@@ -33,5 +33,5 @@ npx knex migrate:latest
 sudo ln -s ~/webapp/webapp.service /lib/systemd/system/webapp.service
 sudo systemctl daemon-reload
 sudo systemctl enable webapp.service
-sudo systemctl start webapp.service
-sudo systemctl restart webapp.service  
+ 
+ 
