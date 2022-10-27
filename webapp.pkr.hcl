@@ -58,7 +58,7 @@ build {
     source      = "./webapp.zip"
     destination = "/home/ubuntu/webapp.zip"
   }
-  
+
   provisioner "file" {
     source      = "./webapp.service"
     destination = "/tmp/webapp.service"
@@ -66,6 +66,6 @@ build {
   provisioner "shell" {
     script = "./app.sh"
   }
-  
+
 
 }
