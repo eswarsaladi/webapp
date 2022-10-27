@@ -5,7 +5,7 @@ sudo apt-get upgrade -y
 # installing dependencies
 
 sudo apt install -y gcc-c++ make
-sudo apt-get install -y nodejs
+sudo apt-get install -y nodejs unzip npm
 # sudo apt install npm postgresql postgresql-contrib unzip -y 
 # # starting postgres
 # sudo systemctl start postgresql.service  
