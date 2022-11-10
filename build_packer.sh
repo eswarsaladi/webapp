@@ -1,4 +1,3 @@
-cd packer
 packer init .
 
 packer fmt .

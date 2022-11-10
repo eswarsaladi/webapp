@@ -1,9 +1,10 @@
 const express = require("express");
-const morgan = require("morgan");
+const logger = require("./utils/logger");
+const morganMiddleware = require("./utils/middlewares/morgan");
 require("dotenv").config();
 
 const app = express();
-app.use(morgan("combined"));
+app.use(morganMiddleware);
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
