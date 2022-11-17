@@ -30,6 +30,7 @@
     "lynx": "^0.2.0",
     "morgan": "^1.10.0",
     "pg": "^8.8.0",
+    "uuid": "^9.0.0",
     "validator": "^13.7.0",
     "winston": "^3.8.2",
     "winston-cloudwatch": "^6.1.1",

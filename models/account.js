@@ -1,5 +1,6 @@
 const bcrypt = require("bcrypt");
 const knex = require("../db/knex");
+const logger = require("../utils/logger");
 
 class Account {
   static async create(userDetails) {
@@ -28,18 +29,20 @@ class Account {
   }
 
   static async isValidPassword(username, password) {
+    let res;
     try {
-      const res = await knex
-        .select("password")
+      res = await knex
+        .select("password", "is_verified")
         .from("accounts")
         .where("username", username)
         .first();
 
-      const result = await bcrypt.compare(password, res.password);
+      const result =
+        (await bcrypt.compare(password, res.password)) && res.is_verified;
 
-      return { response: result };
+      return { response: result, is_verified: res.is_verified };
     } catch (error) {
-      return { error: error.toString() };
+      return { error: error.toString(), is_verified: res.is_verified };
     }
   }
   static async get(id, username) {
@@ -84,6 +87,20 @@ class Account {
       const result = await knex("accounts")
         .update(userDetails)
         .where({ id, username });
+      return { response: result };
+    } catch (error) {
+      return { error: error.toString() };
+    }
+  }
+
+  static async updateWithUsername(username, userDetails) {
+    try {
+      if (userDetails.password) {
+        userDetails.password = await Account.hashPassword(userDetails.password);
+      }
+      const result = await knex("accounts")
+        .update(userDetails)
+        .where({ username });
       return { response: result };
     } catch (error) {
       return { error: error.toString() };
