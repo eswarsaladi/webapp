@@ -16,6 +16,7 @@ exports.up = function (knex) {
       table.string("username").notNullable().unique();
       table.string("password").notNullable();
       table.string("phone");
+      table.boolean("is_verified").defaultTo(false);
       table.timestamp("account_created").defaultTo(knex.fn.now());
       table.timestamp("account_updated").defaultTo(knex.fn.now());
     })
