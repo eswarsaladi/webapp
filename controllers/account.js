@@ -23,6 +23,7 @@ async function update(request, response) {
 }
 
 async function create(request, response) {
+
   try {
     const userDetails = request.body;
     const result = await Account.create(userDetails);
@@ -96,5 +97,6 @@ async function verifyToken(request, response) {
     return response.status(400).json({ error: error.toString() });
   }
 }
+
 
 module.exports = { get, update, create, verifyToken };
