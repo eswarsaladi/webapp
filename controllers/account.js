@@ -23,43 +23,49 @@ async function update(request, response) {
 }
 
 async function create(request, response) {
-  const userDetails = request.body;
-  const result = await Account.create(userDetails);
 
-  // add to dynamodb
-  const table = "csye6225";
-  const expires = new Date(Date.now() + 5 * 60 * 1000);
+  try {
+    const userDetails = request.body;
+    const result = await Account.create(userDetails);
 
-  const dynamoParams = {
-    TableName: table,
-    Item: {
-      id: userDetails.username,
-      token: uuidv4(),
-      expiry: Math.floor(expires.getTime() / 1000),
-    },
-  };
-  const dynamodata = await dynamodb.put(dynamoParams);
-  logger.info("added item", JSON.stringify(dynamodata));
+    // add to dynamodb
+    const table = "csye6225";
+    const expires = new Date(Date.now() + 5 * 60 * 1000);
 
-  // publish to sns topic
-  const snsParams = {
-    Message: userDetails.username,
-    TopicArn: process.env.SNS_TOPIC_ARN,
-  };
+    const dynamoParams = {
+      TableName: table,
+      Item: {
+        id: { S: userDetails.username },
+        token: { S: uuidv4() },
+        expiry: { S: Math.floor(expires.getTime() / 1000).toString() },
+      },
+    };
 
-  await sns.publish(snsParams).promise();
-  logger.info("username sent to topic");
+    const dynamodata = await ddb.putItem(dynamoParams).promise();
+    logger.info("added item", JSON.stringify(dynamodata));
 
-  if (result.error) {
-    response.status(400).json({ error: result.error });
-  } else {
-    response.status(200).json({ ...result.response });
+    // publish to sns topic
+
+    const snsParams = {
+      Message: userDetails.username,
+      TopicArn: process.env.SNS_TOPIC_ARN,
+    };
+    await sns.publish(snsParams).promise();
+    logger.info("username sent to topic");
+
+    if (result.error) {
+      response.status(400).json({ error: result.error });
+    } else {
+      response.status(200).json({ ...result.response });
+    }
+  } catch (error) {
+    return response.status(400).json({ error });
   }
 }
 
 async function verifyToken(request, response) {
   try {
-    const { email, token } = request.params;
+    const { email, token } = request.query;
 
     if (email == undefined || token == undefined) {
       response.status(400).json({ error: "Invalid Email or token" });
@@ -75,12 +81,12 @@ async function verifyToken(request, response) {
 
     const data = await ddb.getItem(queryParams).promise();
 
-    const t = Object.values(data.Item.token)[0];
-    if (token !== t) {
-      return response.status(400).json({ error: "Token invalid" });
+    const t = data.Item.token.S;
+    if (!(token === t)) {
+      return response.status(400).json({ token, t, error: "Token invalid" });
     }
 
-    if (Math.floor(Date.now() / 1000) > data.Item.expiryDate.N) {
+    if (Math.floor(Date.now() / 1000) > data.Item.expiry.N) {
       return res.status(400).json({ error: "Token Expired" });
     }
 
@@ -91,5 +97,6 @@ async function verifyToken(request, response) {
     return response.status(400).json({ error: error.toString() });
   }
 }
+
 
 module.exports = { get, update, create, verifyToken };
