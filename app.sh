@@ -12,7 +12,7 @@ sudo apt-get install -y nodejs unzip npm wget
 
 sudo npm cache clean -f
 sudo npm install -g n
-sudo n 14
+sudo n 16
 
 # setup database
 # sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'postgres';"
