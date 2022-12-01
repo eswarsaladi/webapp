@@ -54,7 +54,15 @@ jobs:
     needs: packer
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
       - run: ./zip_folder.sh
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          aws-access-key-id: ${{secrets.PROD_AWS_ACCESS_ID}}
+          aws-secret-access-key: ${{secrets.PROD_AWS_SECRET_ACCESS_KEY}}
+          aws-region: us-east-1
       - name: Upload Artifact to s3
         run: aws s3 cp webapp.zip s3://${{ env.S3BUCKET }}/
 
@@ -66,8 +74,8 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@v2
-      - uses: aws-actions/configure-aws-credentials@v1
+      - uses: actions/checkout@v3
+      - uses: aws-actions/configure-aws-credentials@@v1-node16
         with:
           role-to-assume: ${{ secrets.IAMROLE_GITHUB }}
           role-session-name: GitHub-Action-Role
