@@ -54,7 +54,7 @@ jobs:
         run: aws s3 cp webapp.zip s3://${{ env.S3BUCKET }}/
 
   deploy:
-    needs: build
+    needs: packer
     runs-on: ubuntu-latest
     environment: Dev
     permissions:
