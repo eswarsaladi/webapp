@@ -5,11 +5,8 @@ on:
     branches: ["main"]
 
 env:
-  HCP_CLIENT_ID: ${{ secrets.HCP_CLIENT_ID }}
-  HCP_CLIENT_SECRET: ${{ secrets.HCP_CLIENT_SECRET }}
-  HCP_PROJECT_ID: ${{ secrets.HCP_PROJECT_ID }}
-  HCP_ORGANIZATION_ID: ${{ secrets.HCP_ORGANIZATION_ID }}
-  HCP_BUCKET_NAME: "csye6225-webapp"
+  AWS_REGION: us-east-1
+  S3BUCKET: myvpc123-webappdeploymentbucket-lzw09rpnddrl
 
 jobs:
   packer:
@@ -52,3 +49,33 @@ jobs:
           target: webapp.pkr.hcl
         env:
           PACKER_LOG: 1
+
+      - name: Upload Artifact to s3
+        run: aws s3 cp webapp.zip s3://${{ env.S3BUCKET }}/
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: Dev
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v2
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.IAMROLE_GITHUB }}
+          role-session-name: GitHub-Action-Role
+          aws-region: ${{ env.AWS_REGION }}
+
+      - run: |
+          echo "Deploying branch ${{ env.GITHUB_REF }} to ${{ github.event.inputs.environment }}"
+          commit_hash=`git rev-parse HEAD`
+          aws deploy create-deployment \
+          --application-name CodeDeployAppNameWithASG \
+          --deployment-config-name CodeDeployDefault.OneAtATime \
+          --deployment-group-name CodeDeployGroupName \
+          --description "CSYE6255 - CodeDeploy" \
+          --s3-location bucket=${{secrets.S3BUCKET}},key=webapp.zip,bundleType=zip \
+          --region ${{secrets.AWS_REGION}} \
+          --output json)
