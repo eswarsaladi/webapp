@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - run: ./zip_folder.sh
 
@@ -50,11 +50,16 @@ jobs:
         env:
           PACKER_LOG: 1
 
+  upload:
+    needs: packer
+    runs-on: ubuntu-latest
+    steps:
+      - run: ./zip_folder.sh
       - name: Upload Artifact to s3
         run: aws s3 cp webapp.zip s3://${{ env.S3BUCKET }}/
 
   deploy:
-    needs: packer
+    needs: upload
     runs-on: ubuntu-latest
     environment: Dev
     permissions:
