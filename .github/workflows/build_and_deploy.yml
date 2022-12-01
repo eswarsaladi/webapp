@@ -6,7 +6,7 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  S3BUCKET: myvpc123-webappdeploymentbucket-lzw09rpnddrl
+  S3BUCKET: myvpc123-deploymentbucket
 
 jobs:
   packer:
@@ -51,7 +51,6 @@ jobs:
           PACKER_LOG: 1
 
   upload:
-    needs: packer
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
